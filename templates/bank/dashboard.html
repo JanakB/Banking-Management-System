@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Dashboard</h3>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">Accounts</div>
+      <ul class="list-group list-group-flush">
+        {% for a in accounts %}
+          <li class="list-group-item">
+            <div class="fw-bold">{{ a.account_number }} ({{ a.get_account_type_display }})</div>
+            <div>Balance: ${{ a.balance }}</div>
+          </li>
+        {% empty %}
+          <li class="list-group-item">No accounts</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Quick actions</span>
+        <div>
+          <a class="btn btn-sm btn-success" href="{% url 'deposit' %}">Deposit</a>
+          <a class="btn btn-sm btn-warning" href="{% url 'withdraw' %}">Withdraw</a>
+          <a class="btn btn-sm btn-primary" href="{% url 'transfer' %}">Transfer</a>
+        </div>
+      </div>
+      <div class="card-body">
+        <div>Totals — Deposits: ${{ total_deposits }} | Withdrawals: ${{ total_withdrawals }}</div>
+        <canvas id="monthlyChart" height="100"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Recent transactions</div>
+      <ul class="list-group list-group-flush">
+        {% for t in transactions %}
+          <li class="list-group-item d-flex justify-content-between">
+            <div>
+              <div class="fw-bold">{{ t.get_transaction_type_display }} - ${{ t.amount }}</div>
+              <div class="text-muted small">{{ t.created_at|date:'Y-m-d H:i' }} | {{ t.get_category_display }}</div>
+            </div>
+            <div>{{ t.account.account_number }}</div>
+          </li>
+        {% empty %}
+          <li class="list-group-item">No transactions</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const monthly = {{ monthly_json|safe }};
+  const labelsSet = new Set();
+  const incomeData = {};
+  const spendData = {};
+  monthly.forEach(row => {
+    labelsSet.add(row.month);
+    const isIncome = row.transaction_type === 'deposit';
+    const dict = isIncome ? incomeData : spendData;
+    dict[row.month] = (dict[row.month] || 0) + parseFloat(row.total);
+  });
+  const labels = Array.from(labelsSet).sort();
+  const income = labels.map(m => incomeData[m] || 0);
+  const spend = labels.map(m => spendData[m] || 0);
+  const ctx = document.getElementById('monthlyChart');
+  if (ctx && labels.length) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Income', data: income, backgroundColor: 'rgba(25,135,84,.6)' },
+          { label: 'Spending', data: spend, backgroundColor: 'rgba(220,53,69,.6)' }
+        ]
+      }
+    });
+  }
+</script>
+{% endblock %}
+

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Delete Beneficiary</h3>
+<p>Are you sure you want to remove <strong>{{ b.nickname|default:b.name }}</strong>?</p>
+<form method="post">
+  {% csrf_token %}
+  <button class="btn btn-danger">Delete</button>
+  <a class="btn btn-outline-secondary" href="{% url 'beneficiaries' %}">Cancel</a>
+</form>
+{% endblock %}
+

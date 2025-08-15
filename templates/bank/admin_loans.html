@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Loan Requests (Admin)</h3>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Amount</th>
+        <th>Purpose</th>
+        <th>Status</th>
+        <th>Requested</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for loan in loans %}
+      <tr>
+        <td>{{ loan.user.username }}</td>
+        <td>${{ loan.amount }}</td>
+        <td class="small">{{ loan.purpose }}{% if loan.document %} — <a href="{{ loan.document.url }}" target="_blank">Document</a>{% endif %}</td>
+        <td>{{ loan.status|capfirst }}</td>
+        <td>{{ loan.created_at|date:'Y-m-d H:i' }}</td>
+        <td class="text-nowrap">
+          <form class="d-inline" method="post" action="{% url 'update_loan_status' loan.id 'approve' %}">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-success" {% if loan.status != 'pending' %}disabled{% endif %}>Approve</button>
+          </form>
+          <form class="d-inline" method="post" action="{% url 'update_loan_status' loan.id 'reject' %}">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-danger" {% if loan.status != 'pending' %}disabled{% endif %}>Reject</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">No loans</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+

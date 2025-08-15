@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Beneficiaries</h3>
+  <a class="btn btn-primary" href="{% url 'add_beneficiary' %}">Add Beneficiary</a>
+  </div>
+
+<div class="card">
+  <ul class="list-group list-group-flush">
+    {% for b in items %}
+      <li class="list-group-item d-flex justify-content-between">
+        <div>
+          <div class="fw-bold">{{ b.nickname|default:b.name }}</div>
+          <div class="text-muted small">{{ b.account_number }} {{ b.email }}</div>
+        </div>
+        <form method="post" action="{% url 'delete_beneficiary' b.pk %}">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No beneficiaries</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+

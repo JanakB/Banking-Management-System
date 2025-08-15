@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Your Loans</h3>
+  <a class="btn btn-primary" href="{% url 'request_loan' %}">Request Loan</a>
+  {% if user.is_authenticated and user.profile.role == 'admin' %}
+    <a class="btn btn-outline-secondary" href="{% url 'admin_loans' %}">Admin Loan Review</a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <ul class="list-group list-group-flush">
+    {% for loan in loans %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <div class="fw-bold">${{ loan.amount }} — {{ loan.get_status_display }}</div>
+          <div class="text-muted small">{{ loan.created_at|date:'Y-m-d H:i' }}</div>
+          <div class="small">{{ loan.purpose }}</div>
+        </div>
+        <span class="badge bg-{% if loan.status == 'approved' %}success{% elif loan.status == 'rejected' %}danger{% else %}secondary{% endif %}">{{ loan.status|capfirst }}</span>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No loans</li>
+    {% endfor %}
+  </ul>
+  </div>
+{% endblock %}
+
